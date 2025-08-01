@@ -1,1 +1,3 @@
-# employee-knowledge-hub-73734
+# Project Repository
+
+This is the initial README file for the project.
