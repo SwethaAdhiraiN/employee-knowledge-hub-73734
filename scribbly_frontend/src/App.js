@@ -1,48 +1,84 @@
-import React, { useState, useEffect } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ThemeProvider } from '@mui/material/styles';
+import { Box, CssBaseline } from '@mui/material';
+import { theme } from './styles/theme';
+import './styles/global.css';
 
-// PUBLIC_INTERFACE
+// Components
+import Navbar from './components/Navbar';
+import Sidebar from './components/Sidebar';
+
+// Pages
+import Home from './pages/Home';
+import BlogEditor from './pages/BlogEditor';
+import BlogView from './pages/BlogView';
+import Profile from './pages/Profile';
+import Login from './pages/Login';
+import Register from './pages/Register';
+
+const MainLayout = ({ children }) => (
+  <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+    <CssBaseline />
+    <Navbar />
+    <Sidebar />
+    <Box
+      component="main"
+      sx={{
+        flexGrow: 1,
+        p: 3,
+        mt: 8,
+        ml: { xs: 0, md: '240px' },
+        width: { xs: '100%', md: `calc(100% - 240px)` },
+      }}
+    >
+      {children}
+    </Box>
+  </Box>
+);
+
 function App() {
-  const [theme, setTheme] = useState('light');
-
-  // Effect to apply theme to document element
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
-
-  // PUBLIC_INTERFACE
-  const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
-  };
-
   return (
-    <div className="App">
-      <header className="App-header">
-        <button 
-          className="theme-toggle" 
-          onClick={toggleTheme}
-          aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-        >
-          {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
-        </button>
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <p>
-          Current theme: <strong>{theme}</strong>
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ThemeProvider theme={theme}>
+      <Router>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route
+            path="/"
+            element={
+              <MainLayout>
+                <Home />
+              </MainLayout>
+            }
+          />
+          <Route
+            path="/new-post"
+            element={
+              <MainLayout>
+                <BlogEditor />
+              </MainLayout>
+            }
+          />
+          <Route
+            path="/post/:id"
+            element={
+              <MainLayout>
+                <BlogView />
+              </MainLayout>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <MainLayout>
+                <Profile />
+              </MainLayout>
+            }
+          />
+        </Routes>
+      </Router>
+    </ThemeProvider>
   );
 }
 
