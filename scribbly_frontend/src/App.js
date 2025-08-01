@@ -1,5 +1,5 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import { Box, CssBaseline } from '@mui/material';
 import { theme } from './styles/theme';
@@ -37,45 +37,86 @@ const MainLayout = ({ children }) => (
   </Box>
 );
 
+// Protected Route component to handle authentication
+const ProtectedRoute = ({ children }) => {
+  const isAuthenticated = localStorage.getItem('token') !== null;
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/login" />;
+  }
+  
+  return children;
+};
+
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Check authentication status
+    const token = localStorage.getItem('token');
+    setIsAuthenticated(token !== null);
+    setIsLoading(false);
+  }, []);
+
+  if (isLoading) {
+    return null; // Don't render anything while checking auth status
+  }
+
   return (
     <ThemeProvider theme={theme}>
       <Router>
         <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={
+            isAuthenticated ? <Navigate to="/" /> : <Login />
+          } />
+          <Route path="/register" element={
+            isAuthenticated ? <Navigate to="/" /> : <Register />
+          } />
           <Route
             path="/"
             element={
-              <MainLayout>
-                <Home />
-              </MainLayout>
+              <ProtectedRoute>
+                <MainLayout>
+                  <Home />
+                </MainLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/new-post"
             element={
-              <MainLayout>
-                <BlogEditor />
-              </MainLayout>
+              <ProtectedRoute>
+                <MainLayout>
+                  <BlogEditor />
+                </MainLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/post/:id"
             element={
-              <MainLayout>
-                <BlogView />
-              </MainLayout>
+              <ProtectedRoute>
+                <MainLayout>
+                  <BlogView />
+                </MainLayout>
+              </ProtectedRoute>
             }
           />
           <Route
             path="/profile"
             element={
-              <MainLayout>
-                <Profile />
-              </MainLayout>
+              <ProtectedRoute>
+                <MainLayout>
+                  <Profile />
+                </MainLayout>
+              </ProtectedRoute>
             }
           />
+          {/* Catch all route - redirect to login if not authenticated */}
+          <Route path="*" element={
+            isAuthenticated ? <Navigate to="/" /> : <Navigate to="/login" />
+          } />
         </Routes>
       </Router>
     </ThemeProvider>
